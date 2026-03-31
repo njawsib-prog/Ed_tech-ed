@@ -32,17 +32,26 @@ apiClient.interceptors.response.use(
       const status = error.response.status;
       const errorCode = error.response.data?.code;
 
-      // Handle 401 Unauthorized
+      console.error(`[API Error] HTTP ${status}:`, error.response.data);
+
+      // Handle 401 Unauthorized — only redirect when NOT already on a login page
       if (status === 401) {
-        // Redirect to appropriate login page based on current path
         if (typeof window !== 'undefined') {
-          const path = window.location.pathname;
-          if (path.startsWith('/super-admin')) {
-            window.location.href = '/super-admin/login';
-          } else if (path.startsWith('/admin')) {
-            window.location.href = '/admin/login';
-          } else if (path.startsWith('/dashboard')) {
-            window.location.href = '/';
+          // Strip query parameters and trailing slashes for comparison
+          const path = window.location.pathname.replace(/\/$/, '');
+          const isLoginPage =
+            path === '' ||
+            path === '/admin/login' ||
+            path === '/super-admin/login';
+
+          if (!isLoginPage) {
+            if (path.startsWith('/super-admin')) {
+              window.location.href = '/super-admin/login';
+            } else if (path.startsWith('/admin')) {
+              window.location.href = '/admin/login';
+            } else if (path.startsWith('/dashboard')) {
+              window.location.href = '/';
+            }
           }
         }
       }
@@ -53,6 +62,9 @@ apiClient.interceptors.response.use(
           window.location.href = '/';
         }
       }
+    } else {
+      // Network error or CORS block — no response object
+      console.error('[API Error] Network/CORS error:', error.message);
     }
 
     return Promise.reject(error);
