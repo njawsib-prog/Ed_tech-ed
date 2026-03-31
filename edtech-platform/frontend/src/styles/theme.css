@@ -1,0 +1,36 @@
+/* Theme CSS Variables - White-Label Configuration */
+
+:root {
+  /* Primary Brand Colors */
+  --color-primary: #4F46E5;
+  --color-secondary: #6B7280;
+  
+  /* Layout Colors */
+  --color-sidebar-bg: #1F2937;
+  --color-text: #1F2937;
+  --color-background: #F9FAFB;
+  
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  
+  /* Spacing & Sizing */
+  --border-radius: 8px;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --transition: 200ms;
+  
+  /* Status Colors */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+}
+
+/* Dark mode variables (optional) */
+[data-theme='dark'] {
+  --color-text: #F9FAFB;
+  --color-background: #111827;
+  --color-sidebar-bg: #0F172A;
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 17, 24, 39;
+  --background-end-rgb: 17, 24, 39;
+}
