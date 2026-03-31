@@ -55,8 +55,11 @@ export function LoginForm({ role, redirectPath }: LoginFormProps) {
 
       router.push(redirectPath);
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Login failed. Please try again.');
+      const axiosError = err as { response?: { status?: number; data?: { error?: string } } };
+      const status = axiosError.response?.status;
+      const errorMessage = axiosError.response?.data?.error || 'Login failed. Please try again.';
+      console.error(`[Login] Failed — status: ${status ?? 'network/CORS error'}, message: ${errorMessage}`);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

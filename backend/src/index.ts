@@ -3,7 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import { config } from 'dotenv';
 import cookieParser from 'cookie-parser';
-import { rateLimiter, authRateLimiter, twoFactorRateLimiter } from './middleware/rateLimiter';
+import { rateLimiter } from './middleware/rateLimiter';
 import auditLogger from './middleware/auditLogger';
 
 // Import routes
@@ -34,12 +34,13 @@ app.use(helmet({
 }));
 
 // CORS configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim()) || ['http://localhost:3000'];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.warn(`[CORS] Rejected origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -54,8 +55,6 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cookieParser());
 
 // Rate limiting
-app.use('/api/auth/login', authRateLimiter);
-app.use('/api/auth/2fa', twoFactorRateLimiter);
 app.use('/api', rateLimiter);
 
 // Audit logging for mutating requests
