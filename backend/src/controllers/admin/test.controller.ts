@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { supabaseAdmin } from '../../db/supabaseAdmin';
 import { Queue } from 'bullmq';
-import { redisClient } from '../../utils/redisClient';
+import { bullmqConnection } from '../../utils/redisClient';
 
 // Initialize test schedule queue
 const testScheduleQueue = new Queue('testSchedule', {
-  connection: redisClient,
+  connection: bullmqConnection,
 });
 
 /**

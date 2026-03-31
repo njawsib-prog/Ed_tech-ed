@@ -6,6 +6,12 @@ export const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost
   enableReadyCheck: true,
 });
 
+// Dedicated Redis connection for BullMQ (requires maxRetriesPerRequest: null)
+export const bullmqConnection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+  maxRetriesPerRequest: null,
+  enableReadyCheck: false,
+});
+
 // Handle connection events
 redisClient.on('connect', () => {
   console.log('📦 Redis connected');
