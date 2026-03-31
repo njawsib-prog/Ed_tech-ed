@@ -5,22 +5,14 @@ import crypto from 'crypto';
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
-
 // QR Code expiration time (15 minutes)
 const QR_EXPIRATION = 15 * 60;
 
 // Generate QR code for attendance
-export const generateQRCode = async (req: AuthRequest, res: Response): Promise<void> => {
+export const generateQRCode = async (req: Request, res: Response): Promise<void> => {
   try {
     const { batchId, subjectId, duration = QR_EXPIRATION } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     // Verify batch belongs to branch
@@ -71,11 +63,11 @@ export const generateQRCode = async (req: AuthRequest, res: Response): Promise<v
 };
 
 // Mark attendance via QR scan (student)
-export const markAttendanceViaQR = async (req: AuthRequest, res: Response): Promise<void> => {
+export const markAttendanceViaQR = async (req: Request, res: Response): Promise<void> => {
   try {
     const { token } = req.body;
     const studentId = req.user!.id;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get QR session from Redis
     const qrId = `qr:${branchId}:${token}`;
@@ -152,10 +144,10 @@ export const markAttendanceViaQR = async (req: AuthRequest, res: Response): Prom
 };
 
 // Manual attendance marking (by admin/faculty)
-export const markManualAttendance = async (req: AuthRequest, res: Response): Promise<void> => {
+export const markManualAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const { studentIds, batchId, subjectId, date, status = 'present', notes } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     if (!studentIds?.length) {
@@ -203,7 +195,7 @@ export const markManualAttendance = async (req: AuthRequest, res: Response): Pro
 };
 
 // Get attendance records with filtering
-export const getAttendance = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       page = 1,
@@ -219,7 +211,7 @@ export const getAttendance = async (req: AuthRequest, res: Response): Promise<vo
     } = req.query;
 
     const offset = (Number(page) - 1) * Number(limit);
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('attendance')
@@ -275,11 +267,11 @@ export const getAttendance = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Get attendance summary for a batch
-export const getBatchAttendanceSummary = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getBatchAttendanceSummary = async (req: Request, res: Response): Promise<void> => {
   try {
     const { batchId } = req.params;
     const { month, year } = req.query;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Verify batch belongs to branch
     const { data: batch, error: batchError } = await supabaseAdmin
@@ -369,11 +361,11 @@ export const getBatchAttendanceSummary = async (req: AuthRequest, res: Response)
 };
 
 // Get student attendance history
-export const getStudentAttendanceHistory = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getStudentAttendanceHistory = async (req: Request, res: Response): Promise<void> => {
   try {
     const { studentId } = req.params;
     const { startDate, endDate } = req.query;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('attendance')
@@ -423,11 +415,11 @@ export const getStudentAttendanceHistory = async (req: AuthRequest, res: Respons
 };
 
 // Update attendance record
-export const updateAttendance = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { status, checkOutTime, notes } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Verify attendance belongs to branch
     const { data: existing, error: fetchError } = await supabaseAdmin
@@ -469,10 +461,10 @@ export const updateAttendance = async (req: AuthRequest, res: Response): Promise
 };
 
 // Bulk update attendance
-export const bulkUpdateAttendance = async (req: AuthRequest, res: Response): Promise<void> => {
+export const bulkUpdateAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const { attendanceIds, status } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     if (!attendanceIds?.length) {
       res.status(400).json({ error: 'Attendance IDs are required' });
@@ -512,10 +504,10 @@ export const bulkUpdateAttendance = async (req: AuthRequest, res: Response): Pro
 };
 
 // Export attendance to CSV
-export const exportAttendance = async (req: AuthRequest, res: Response): Promise<void> => {
+export const exportAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const { batchId, startDate, endDate } = req.query;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('attendance')
@@ -582,9 +574,9 @@ export const exportAttendance = async (req: AuthRequest, res: Response): Promise
 };
 
 // Get active QR sessions
-export const getActiveQRSessions = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getActiveQRSessions = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Scan for all QR sessions for this branch
     const keys = await redis.keys(`qr:${branchId}:*`);
@@ -616,10 +608,10 @@ export const getActiveQRSessions = async (req: AuthRequest, res: Response): Prom
 };
 
 // Cancel/expire QR session
-export const cancelQRSession = async (req: AuthRequest, res: Response): Promise<void> => {
+export const cancelQRSession = async (req: Request, res: Response): Promise<void> => {
   try {
     const { token } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const qrId = `qr:${branchId}:${token}`;
     await redis.del(qrId);

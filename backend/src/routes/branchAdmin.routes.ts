@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { requireRole } from '../middleware/roleMiddleware';
-import { branchOnly } from '../middleware/branchMiddleware';
-import multer from 'multer';
+import { branchMiddleware } from '../middleware/branchMiddleware';
 
 // Import controllers
 import * as paymentController from '../controllers/branch-admin/payment.controller';
@@ -9,15 +8,9 @@ import * as batchController from '../controllers/branch-admin/batch.controller';
 
 const router = Router();
 
-// Configure multer for file uploads
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
-});
-
 // All routes require admin role and branch access
-router.use(requireRole(['admin', 'super_admin']));
-router.use(branchOnly);
+router.use(requireRole('branch_admin', 'super_admin'));
+router.use(branchMiddleware);
 
 // ==================== PAYMENT ROUTES ====================
 router.get('/payments', paymentController.getPaymentHistory);

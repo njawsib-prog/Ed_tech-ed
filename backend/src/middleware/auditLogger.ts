@@ -35,7 +35,7 @@ export const auditLogger = async (req: Request, res: Response, next: NextFunctio
         req.user && 
         req.user.role !== 'student'; // Don't log student actions
 
-      if (!shouldLog) return;
+      if (!shouldLog || !req.user) return;
 
       // Extract entity from path (e.g., /api/admin/students -> students)
       const pathParts = req.path.split('/').filter(Boolean);

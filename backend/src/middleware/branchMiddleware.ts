@@ -81,7 +81,7 @@ export const branchMiddleware = (req: Request, res: Response, next: NextFunction
  * Use this in controllers instead of accessing req.user.branch_id directly
  */
 export function getBranchId(req: Request): string | undefined {
-  return res.locals.branchId || req.user?.branch_id;
+  return req.user?.branch_id;
 }
 
 /**

@@ -27,7 +27,7 @@ router.get('/branches/compare', branchController.compareBranches);
 router.get('/branches', branchController.getBranches);
 router.post('/branches', branchController.createBranch);
 router.patch('/branches/bulk', branchController.bulkBranchAction);
-router.get('/branches/:id', branchController.getById);
+router.get('/branches/:id', branchController.getBranchById);
 router.put('/branches/:id', branchController.updateBranch);
 
 // ============================================

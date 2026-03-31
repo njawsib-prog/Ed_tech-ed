@@ -3,7 +3,6 @@ import Redis from 'ioredis';
 // Redis client for caching and job queues
 export const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: 3,
-  retryDelayOnFailover: 100,
   enableReadyCheck: true,
 });
 

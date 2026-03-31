@@ -4,19 +4,11 @@ import Redis from 'ioredis';
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
-
 // Get student dashboard data
-export const getDashboard = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getDashboard = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get student details
     const { data: student, error: studentError } = await supabaseAdmin
@@ -157,7 +149,7 @@ export const getDashboard = async (req: AuthRequest, res: Response): Promise<voi
 };
 
 // Get student profile
-export const getProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
 
@@ -196,7 +188,7 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<void>
 };
 
 // Update student profile
-export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
     const { phone, address, avatarUrl } = req.body;
@@ -234,7 +226,7 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Get student's upcoming tests
-export const getUpcomingTests = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getUpcomingTests = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
 
@@ -290,7 +282,7 @@ export const getUpcomingTests = async (req: AuthRequest, res: Response): Promise
 };
 
 // Get student's test history
-export const getTestHistory = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getTestHistory = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
     const { page = 1, limit = 10 } = req.query;
@@ -351,7 +343,7 @@ export const getTestHistory = async (req: AuthRequest, res: Response): Promise<v
 };
 
 // Get student's attendance summary
-export const getAttendanceSummary = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getAttendanceSummary = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
     const { month, year } = req.query;
@@ -415,7 +407,7 @@ export const getAttendanceSummary = async (req: AuthRequest, res: Response): Pro
 };
 
 // Get student's fee status
-export const getFeeStatus = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getFeeStatus = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
 
@@ -474,7 +466,7 @@ export const getFeeStatus = async (req: AuthRequest, res: Response): Promise<voi
 };
 
 // Get student's study materials
-export const getStudyMaterials = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getStudyMaterials = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
     const { subjectId, type } = req.query;
@@ -538,7 +530,7 @@ export const getStudyMaterials = async (req: AuthRequest, res: Response): Promis
 };
 
 // Get student's timetable
-export const getTimetable = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getTimetable = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
 

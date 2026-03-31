@@ -2,16 +2,8 @@ import { Request, Response } from 'express';
 import { supabaseAdmin } from '../../db/supabaseAdmin';
 import PDFDocument from 'pdfkit';
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
-
 // Get payment history for branch
-export const getPaymentHistory = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getPaymentHistory = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       page = 1,
@@ -25,7 +17,7 @@ export const getPaymentHistory = async (req: AuthRequest, res: Response): Promis
     } = req.query;
 
     const offset = (Number(page) - 1) * Number(limit);
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('payments')
@@ -84,9 +76,9 @@ export const getPaymentHistory = async (req: AuthRequest, res: Response): Promis
 };
 
 // Get pending fees
-export const getPendingFees = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getPendingFees = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const { batchId } = req.query;
 
     let query = supabaseAdmin
@@ -120,7 +112,7 @@ export const getPendingFees = async (req: AuthRequest, res: Response): Promise<v
 };
 
 // Record payment
-export const recordPayment = async (req: AuthRequest, res: Response): Promise<void> => {
+export const recordPayment = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       studentId,
@@ -133,8 +125,13 @@ export const recordPayment = async (req: AuthRequest, res: Response): Promise<vo
       notes
     } = req.body;
 
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
+
+    if (!branchId) {
+      res.status(403).json({ error: 'Branch ID not assigned to user' });
+      return;
+    }
 
     // Verify student belongs to branch
     const { data: student, error: studentError } = await supabaseAdmin
@@ -208,10 +205,10 @@ export const recordPayment = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Generate receipt PDF
-export const generateReceiptPDF = async (req: AuthRequest, res: Response): Promise<void> => {
+export const generateReceiptPDF = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get payment details
     const { data: payment, error } = await supabaseAdmin
@@ -308,9 +305,9 @@ export const generateReceiptPDF = async (req: AuthRequest, res: Response): Promi
 };
 
 // Get fee defaulters
-export const getFeeDefaulters = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getFeeDefaulters = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const { batchId, months = 2 } = req.query;
 
     // Get branch settings for due date
@@ -413,10 +410,10 @@ export const getFeeDefaulters = async (req: AuthRequest, res: Response): Promise
 };
 
 // Send payment reminder
-export const sendPaymentReminder = async (req: AuthRequest, res: Response): Promise<void> => {
+export const sendPaymentReminder = async (req: Request, res: Response): Promise<void> => {
   try {
     const { studentIds } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     if (!studentIds?.length) {
       res.status(400).json({ error: 'Student IDs are required' });
@@ -460,9 +457,9 @@ export const sendPaymentReminder = async (req: AuthRequest, res: Response): Prom
 };
 
 // Get payment statistics
-export const getPaymentStats = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getPaymentStats = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const { period = 'month' } = req.query;
 
     // Calculate date range

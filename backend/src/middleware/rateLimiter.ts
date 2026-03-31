@@ -94,3 +94,7 @@ export const twoFactorRateLimiter = rateLimit({
 });
 
 export default loginRateLimiter;
+
+// Aliases used by index.ts
+export const rateLimiter = apiRateLimiter;
+export const authRateLimiter = loginRateLimiter;

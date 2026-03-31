@@ -5,23 +5,15 @@ import { shuffleArray } from '../../utils/helpers';
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
-
 // Test session cache prefix
 const SESSION_PREFIX = 'test_session:';
 
 // Start test
-export const startTest = async (req: AuthRequest, res: Response): Promise<void> => {
+export const startTest = async (req: Request, res: Response): Promise<void> => {
   try {
     const { testId } = req.params;
     const userId = req.user!.id;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get student
     const { data: student } = await supabaseAdmin
@@ -189,7 +181,7 @@ export const startTest = async (req: AuthRequest, res: Response): Promise<void> 
 };
 
 // Save answer
-export const saveAnswer = async (req: AuthRequest, res: Response): Promise<void> => {
+export const saveAnswer = async (req: Request, res: Response): Promise<void> => {
   try {
     const { testId } = req.params;
     const { questionId, answer, timeSpent } = req.body;
@@ -238,7 +230,7 @@ export const saveAnswer = async (req: AuthRequest, res: Response): Promise<void>
 };
 
 // Get current session state
-export const getSession = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getSession = async (req: Request, res: Response): Promise<void> => {
   try {
     const { testId } = req.params;
     const userId = req.user!.id;
@@ -282,12 +274,12 @@ export const getSession = async (req: AuthRequest, res: Response): Promise<void>
 };
 
 // Submit test
-export const submitTest = async (req: AuthRequest, res: Response): Promise<void> => {
+export const submitTest = async (req: Request, res: Response): Promise<void> => {
   try {
     const { testId } = req.params;
     const { answers, forceSubmit = false } = req.body;
     const userId = req.user!.id;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get student
     const { data: student } = await supabaseAdmin
@@ -470,7 +462,7 @@ export const submitTest = async (req: AuthRequest, res: Response): Promise<void>
 };
 
 // Get test result
-export const getTestResult = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getTestResult = async (req: Request, res: Response): Promise<void> => {
   try {
     const { resultId } = req.params;
     const userId = req.user!.id;
@@ -550,7 +542,7 @@ export const getTestResult = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Auto-submit on time expiry (called by frontend timer)
-export const autoSubmit = async (req: AuthRequest, res: Response): Promise<void> => {
+export const autoSubmit = async (req: Request, res: Response): Promise<void> => {
   try {
     const { testId } = req.params;
     const userId = req.user!.id;
@@ -584,7 +576,7 @@ export const autoSubmit = async (req: AuthRequest, res: Response): Promise<void>
 };
 
 // Flag question for review
-export const flagQuestion = async (req: AuthRequest, res: Response): Promise<void> => {
+export const flagQuestion = async (req: Request, res: Response): Promise<void> => {
   try {
     const { testId } = req.params;
     const { questionId, flagged } = req.body;

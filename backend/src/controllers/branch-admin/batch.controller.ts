@@ -1,18 +1,10 @@
 import { Request, Response } from 'express';
 import { supabaseAdmin } from '../../db/supabaseAdmin';
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
-
 // Get all batches for branch
-export const getBatches = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getBatches = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const { isActive, courseId } = req.query;
 
     let query = supabaseAdmin
@@ -57,10 +49,10 @@ export const getBatches = async (req: AuthRequest, res: Response): Promise<void>
 };
 
 // Get batch by ID with details
-export const getBatchById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getBatchById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: batch, error } = await supabaseAdmin
       .from('batches')
@@ -110,7 +102,7 @@ export const getBatchById = async (req: AuthRequest, res: Response): Promise<voi
 };
 
 // Create new batch
-export const createBatch = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createBatch = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       name,
@@ -123,7 +115,7 @@ export const createBatch = async (req: AuthRequest, res: Response): Promise<void
       studentIds = []
     } = req.body;
 
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     // Check if batch code exists
@@ -185,11 +177,11 @@ export const createBatch = async (req: AuthRequest, res: Response): Promise<void
 };
 
 // Update batch
-export const updateBatch = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateBatch = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, code, facultyId, capacity, startDate, endDate, isActive } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Check if batch exists
     const { data: existingBatch, error: fetchError } = await supabaseAdmin
@@ -251,10 +243,10 @@ export const updateBatch = async (req: AuthRequest, res: Response): Promise<void
 };
 
 // Delete batch
-export const deleteBatch = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteBatch = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Check for students in batch
     const { data: students } = await supabaseAdmin
@@ -288,11 +280,11 @@ export const deleteBatch = async (req: AuthRequest, res: Response): Promise<void
 };
 
 // Add students to batch
-export const addStudentsToBatch = async (req: AuthRequest, res: Response): Promise<void> => {
+export const addStudentsToBatch = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { studentIds } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     if (!studentIds?.length) {
       res.status(400).json({ error: 'Student IDs are required' });
@@ -361,10 +353,10 @@ export const addStudentsToBatch = async (req: AuthRequest, res: Response): Promi
 };
 
 // Remove student from batch
-export const removeStudentFromBatch = async (req: AuthRequest, res: Response): Promise<void> => {
+export const removeStudentFromBatch = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id, studentId } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Verify batch exists
     const { data: batch } = await supabaseAdmin
@@ -398,11 +390,11 @@ export const removeStudentFromBatch = async (req: AuthRequest, res: Response): P
 };
 
 // Transfer student between batches
-export const transferStudent = async (req: AuthRequest, res: Response): Promise<void> => {
+export const transferStudent = async (req: Request, res: Response): Promise<void> => {
   try {
     const { studentId } = req.params;
     const { sourceBatchId, targetBatchId, reason } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     // Verify both batches exist
@@ -471,9 +463,9 @@ export const transferStudent = async (req: AuthRequest, res: Response): Promise<
 };
 
 // Get batch statistics
-export const getBatchStats = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getBatchStats = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get all batches with counts
     const { data: batches } = await supabaseAdmin
@@ -531,11 +523,11 @@ export const getBatchStats = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Promote batch (move to next level/course)
-export const promoteBatch = async (req: AuthRequest, res: Response): Promise<void> => {
+export const promoteBatch = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { newCourseId, newBatchName, promoteStudents = true } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     // Get current batch
@@ -602,10 +594,10 @@ export const promoteBatch = async (req: AuthRequest, res: Response): Promise<voi
 };
 
 // Export batch students
-export const exportBatchStudents = async (req: AuthRequest, res: Response): Promise<void> => {
+export const exportBatchStudents = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get batch with students
     const { data: batch, error } = await supabaseAdmin

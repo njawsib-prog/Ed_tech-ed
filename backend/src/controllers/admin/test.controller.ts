@@ -401,7 +401,7 @@ export const getTestAnalytics = async (req: Request, res: Response): Promise<voi
     // Get results statistics
     const { data: results } = await supabaseAdmin
       .from('results')
-      .select('score, percentage, status, time_taken')
+      .select('id, score, percentage, status, time_taken')
       .eq('test_id', id);
 
     // Get question-level analytics

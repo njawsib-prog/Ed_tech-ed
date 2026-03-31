@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireRole } from '../middleware/roleMiddleware';
-import { branchOnly } from '../middleware/branchMiddleware';
+import { branchMiddleware } from '../middleware/branchMiddleware';
 import * as dashboardController from '../controllers/student/dashboard.controller';
 import * as testEngineController from '../controllers/student/testEngine.controller';
 import * as notificationController from '../controllers/admin/notification.controller';
@@ -8,8 +8,8 @@ import * as notificationController from '../controllers/admin/notification.contr
 const router = Router();
 
 // All routes require student role
-router.use(requireRole(['student']));
-router.use(branchOnly);
+router.use(requireRole('student'));
+router.use(branchMiddleware);
 
 // ==================== DASHBOARD ROUTES ====================
 router.get('/dashboard', dashboardController.getDashboard);

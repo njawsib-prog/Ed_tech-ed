@@ -1,19 +1,11 @@
 import { Request, Response } from 'express';
 import { supabaseAdmin } from '../../db/supabaseAdmin';
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
-
 // Get timetables with filtering
-export const getTimetables = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getTimetables = async (req: Request, res: Response): Promise<void> => {
   try {
     const { batchId, isActive = true } = req.query;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('timetables')
@@ -50,10 +42,10 @@ export const getTimetables = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Get full timetable with entries
-export const getTimetableById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getTimetableById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: timetable, error: timetableError } = await supabaseAdmin
       .from('timetables')
@@ -125,10 +117,10 @@ export const getTimetableById = async (req: AuthRequest, res: Response): Promise
 };
 
 // Create timetable
-export const createTimetable = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createTimetable = async (req: Request, res: Response): Promise<void> => {
   try {
     const { batchId, name, effectiveFrom, effectiveTo, entries } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     // Verify batch exists
@@ -225,11 +217,11 @@ export const createTimetable = async (req: AuthRequest, res: Response): Promise<
 };
 
 // Update timetable
-export const updateTimetable = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateTimetable = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, effectiveFrom, effectiveTo, isActive } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Verify timetable exists
     const { data: existing, error: fetchError } = await supabaseAdmin
@@ -272,10 +264,10 @@ export const updateTimetable = async (req: AuthRequest, res: Response): Promise<
 };
 
 // Delete timetable
-export const deleteTimetable = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteTimetable = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Verify timetable exists
     const { data: existing, error: fetchError } = await supabaseAdmin
@@ -315,11 +307,11 @@ export const deleteTimetable = async (req: AuthRequest, res: Response): Promise<
 };
 
 // Add entry to timetable
-export const addTimetableEntry = async (req: AuthRequest, res: Response): Promise<void> => {
+export const addTimetableEntry = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { dayOfWeek, startTime, endTime, subjectId, facultyId, room, type, notes } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Verify timetable exists
     const { data: timetable, error: timetableError } = await supabaseAdmin
@@ -425,11 +417,11 @@ export const addTimetableEntry = async (req: AuthRequest, res: Response): Promis
 };
 
 // Update timetable entry
-export const updateTimetableEntry = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateTimetableEntry = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id, entryId } = req.params;
     const { dayOfWeek, startTime, endTime, subjectId, facultyId, room, type, notes } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Verify timetable exists
     const { data: timetable } = await supabaseAdmin
@@ -477,10 +469,10 @@ export const updateTimetableEntry = async (req: AuthRequest, res: Response): Pro
 };
 
 // Delete timetable entry
-export const deleteTimetableEntry = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteTimetableEntry = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id, entryId } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Verify timetable exists
     const { data: timetable } = await supabaseAdmin
@@ -514,10 +506,10 @@ export const deleteTimetableEntry = async (req: AuthRequest, res: Response): Pro
 };
 
 // Get today's schedule for a batch
-export const getTodaySchedule = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getTodaySchedule = async (req: Request, res: Response): Promise<void> => {
   try {
     const { batchId } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
 
@@ -590,11 +582,11 @@ export const getTodaySchedule = async (req: AuthRequest, res: Response): Promise
 };
 
 // Copy timetable to another batch
-export const copyTimetable = async (req: AuthRequest, res: Response): Promise<void> => {
+export const copyTimetable = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { targetBatchId, name } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     // Get source timetable
@@ -679,10 +671,10 @@ export const copyTimetable = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Export timetable to PDF
-export const exportTimetablePDF = async (req: AuthRequest, res: Response): Promise<void> => {
+export const exportTimetablePDF = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get timetable with entries
     const { data: timetable, error: timetableError } = await supabaseAdmin
