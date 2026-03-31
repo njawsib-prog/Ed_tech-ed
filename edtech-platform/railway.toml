@@ -1,0 +1,39 @@
+# Railway deployment configuration for EdTech Platform
+
+# Backend Service
+[[services]]
+name = "edtech-backend"
+source = "backend"
+
+[services.build]
+builder = "dockerfile"
+
+[services.variables]
+NODE_ENV = "production"
+PORT = "3001"
+
+[[services.domains]]
+domain = "${RAILWAY_STATIC_URL}"
+
+# Frontend Service
+[[services]]
+name = "edtech-frontend"
+source = "frontend"
+
+[services.build]
+builder = "dockerfile"
+build_args = [
+  { name = "NEXT_PUBLIC_API_URL", value = "https://${{edtech-backend.RAILWAY_STATIC_URL}}" },
+  { name = "NEXT_PUBLIC_SUPABASE_URL", value = "${{SUPABASE_URL}}" },
+  { name = "NEXT_PUBLIC_SUPABASE_ANON_KEY", value = "${{SUPABASE_ANON_KEY}}" }
+]
+
+[services.variables]
+NODE_ENV = "production"
+PORT = "3000"
+NEXT_PUBLIC_API_URL = "https://${{edtech-backend.RAILWAY_STATIC_URL}}"
+
+# Redis Service (managed)
+[[services]]
+name = "edtech-redis"
+template = "redis"
