@@ -1,19 +1,11 @@
 import { Request, Response } from 'express';
 import { supabaseAdmin } from '../../db/supabaseAdmin';
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
-
 // Get all feedback forms
-export const getFeedbackForms = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getFeedbackForms = async (req: Request, res: Response): Promise<void> => {
   try {
     const { isActive, type } = req.query;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('feedback_forms')
@@ -51,10 +43,10 @@ export const getFeedbackForms = async (req: AuthRequest, res: Response): Promise
 };
 
 // Get feedback form by ID with questions
-export const getFeedbackFormById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getFeedbackFormById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: form, error: formError } = await supabaseAdmin
       .from('feedback_forms')
@@ -91,7 +83,7 @@ export const getFeedbackFormById = async (req: AuthRequest, res: Response): Prom
 };
 
 // Create feedback form
-export const createFeedbackForm = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createFeedbackForm = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       title,
@@ -104,7 +96,7 @@ export const createFeedbackForm = async (req: AuthRequest, res: Response): Promi
       questions
     } = req.body;
 
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     // Create form
@@ -173,11 +165,11 @@ export const createFeedbackForm = async (req: AuthRequest, res: Response): Promi
 };
 
 // Update feedback form
-export const updateFeedbackForm = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateFeedbackForm = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { title, description, isActive, startDate, endDate } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Check for existing responses
     const { data: responses } = await supabaseAdmin
@@ -224,10 +216,10 @@ export const updateFeedbackForm = async (req: AuthRequest, res: Response): Promi
 };
 
 // Delete feedback form
-export const deleteFeedbackForm = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteFeedbackForm = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Delete questions first
     await supabaseAdmin.from('feedback_questions').delete().eq('formId', id);
@@ -266,10 +258,10 @@ export const deleteFeedbackForm = async (req: AuthRequest, res: Response): Promi
 };
 
 // Submit feedback response (student)
-export const submitFeedbackResponse = async (req: AuthRequest, res: Response): Promise<void> => {
+export const submitFeedbackResponse = async (req: Request, res: Response): Promise<void> => {
   try {
     const { formId, answers } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     // Get form details
@@ -369,11 +361,11 @@ export const submitFeedbackResponse = async (req: AuthRequest, res: Response): P
 };
 
 // Get feedback responses
-export const getFeedbackResponses = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getFeedbackResponses = async (req: Request, res: Response): Promise<void> => {
   try {
     const { formId } = req.params;
     const { page = 1, limit = 20 } = req.query;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const offset = (Number(page) - 1) * Number(limit);
 
@@ -435,10 +427,10 @@ export const getFeedbackResponses = async (req: AuthRequest, res: Response): Pro
 };
 
 // Get feedback analytics
-export const getFeedbackAnalytics = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getFeedbackAnalytics = async (req: Request, res: Response): Promise<void> => {
   try {
     const { formId } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Verify form belongs to branch
     const { data: form, error: formError } = await supabaseAdmin
@@ -542,10 +534,10 @@ export const getFeedbackAnalytics = async (req: AuthRequest, res: Response): Pro
 };
 
 // Export feedback responses
-export const exportFeedbackResponses = async (req: AuthRequest, res: Response): Promise<void> => {
+export const exportFeedbackResponses = async (req: Request, res: Response): Promise<void> => {
   try {
     const { formId } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get form and questions
     const { data: form } = await supabaseAdmin

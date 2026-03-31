@@ -77,11 +77,14 @@ export const getDashboardAnalytics = async (req: Request, res: Response): Promis
 
     const branchPerformance: Record<string, { name: string; total: number; count: number }> = {};
     
-    branchResults?.forEach((r: { score: number; total: number; students: { branch_id: string; branches: { id: string; name: string } } }) => {
-      const branchId = r.students.branch_id;
+    branchResults?.forEach((r: { score: number; total: number; students: { branch_id: string; branches: { id: string; name: string }[] }[] }) => {
+      const studentRow = Array.isArray(r.students) ? r.students[0] : r.students;
+      if (!studentRow) return;
+      const branch = Array.isArray(studentRow.branches) ? studentRow.branches[0] : studentRow.branches;
+      const branchId = studentRow.branch_id;
       if (!branchPerformance[branchId]) {
         branchPerformance[branchId] = {
-          name: r.students.branches.name,
+          name: branch?.name ?? 'Unknown Branch',
           total: 0,
           count: 0,
         };

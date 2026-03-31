@@ -1,16 +1,8 @@
 import { Request, Response } from 'express';
 import { supabaseAdmin } from '../../db/supabaseAdmin';
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
-
 // Get all complaints with filtering
-export const getComplaints = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getComplaints = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       page = 1,
@@ -24,7 +16,7 @@ export const getComplaints = async (req: AuthRequest, res: Response): Promise<vo
     } = req.query;
 
     const offset = (Number(page) - 1) * Number(limit);
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('complaints')
@@ -80,10 +72,10 @@ export const getComplaints = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Get complaint by ID with full details
-export const getComplaintById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getComplaintById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: complaint, error } = await supabaseAdmin
       .from('complaints')
@@ -125,7 +117,7 @@ export const getComplaintById = async (req: AuthRequest, res: Response): Promise
 };
 
 // Create complaint (student or admin on behalf)
-export const createComplaint = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createComplaint = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       title,
@@ -137,7 +129,7 @@ export const createComplaint = async (req: AuthRequest, res: Response): Promise<
       attachments = []
     } = req.body;
 
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     // If student creating their own complaint
@@ -208,11 +200,11 @@ export const createComplaint = async (req: AuthRequest, res: Response): Promise<
 };
 
 // Update complaint status/priority
-export const updateComplaint = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateComplaint = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { status, priority, assignedTo } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get current complaint
     const { data: existing, error: fetchError } = await supabaseAdmin
@@ -281,11 +273,11 @@ export const updateComplaint = async (req: AuthRequest, res: Response): Promise<
 };
 
 // Add response to complaint
-export const addComplaintResponse = async (req: AuthRequest, res: Response): Promise<void> => {
+export const addComplaintResponse = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { message } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     if (!message) {
@@ -364,10 +356,10 @@ export const addComplaintResponse = async (req: AuthRequest, res: Response): Pro
 };
 
 // Delete complaint (admin only)
-export const deleteComplaint = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteComplaint = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Delete responses first
     await supabaseAdmin
@@ -395,9 +387,9 @@ export const deleteComplaint = async (req: AuthRequest, res: Response): Promise<
 };
 
 // Get complaint statistics
-export const getComplaintStats = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getComplaintStats = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get all complaints for stats
     const { data: complaints } = await supabaseAdmin
@@ -472,10 +464,10 @@ export const getComplaintStats = async (req: AuthRequest, res: Response): Promis
 };
 
 // Bulk update complaints
-export const bulkUpdateComplaints = async (req: AuthRequest, res: Response): Promise<void> => {
+export const bulkUpdateComplaints = async (req: Request, res: Response): Promise<void> => {
   try {
     const { complaintIds, status, priority, assignedTo } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     if (!complaintIds?.length) {
       res.status(400).json({ error: 'Complaint IDs are required' });
@@ -524,10 +516,10 @@ export const bulkUpdateComplaints = async (req: AuthRequest, res: Response): Pro
 };
 
 // Export complaints to CSV
-export const exportComplaints = async (req: AuthRequest, res: Response): Promise<void> => {
+export const exportComplaints = async (req: Request, res: Response): Promise<void> => {
   try {
     const { status, priority, startDate, endDate } = req.query;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('complaints')

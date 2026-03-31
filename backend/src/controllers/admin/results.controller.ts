@@ -4,16 +4,8 @@ import Redis from 'ioredis';
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
-
 // Get all results with filtering and pagination
-export const getResults = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getResults = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       page = 1,
@@ -27,7 +19,7 @@ export const getResults = async (req: AuthRequest, res: Response): Promise<void>
     } = req.query;
 
     const offset = (Number(page) - 1) * Number(limit);
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('results')
@@ -81,10 +73,10 @@ export const getResults = async (req: AuthRequest, res: Response): Promise<void>
 };
 
 // Get result details with question-wise analysis
-export const getResultById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getResultById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: result, error } = await supabaseAdmin
       .from('results')
@@ -173,11 +165,11 @@ export const getResultById = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Generate leaderboard for a test
-export const getLeaderboard = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getLeaderboard = async (req: Request, res: Response): Promise<void> => {
   try {
     const { testId } = req.params;
     const { limit = 50 } = req.query;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Check cache first
     const cacheKey = `leaderboard:${branchId}:${testId}`;
@@ -226,8 +218,8 @@ export const getLeaderboard = async (req: AuthRequest, res: Response): Promise<v
 
     // Assign ranks
     let currentRank = 1;
-    let prevScore = null;
-    let prevTime = null;
+    let prevScore: number | null = null;
+    let prevTime: number | null = null;
     
     const leaderboard = results.map((result: any, index: number) => {
       // Handle ties - same score and time get same rank
@@ -255,9 +247,9 @@ export const getLeaderboard = async (req: AuthRequest, res: Response): Promise<v
 };
 
 // Get results analytics for dashboard
-export const getResultsAnalytics = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getResultsAnalytics = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const { period = '30d' } = req.query;
 
     // Calculate date range
@@ -361,11 +353,11 @@ export const getResultsAnalytics = async (req: AuthRequest, res: Response): Prom
 };
 
 // Re-evaluate a result (for disputed questions)
-export const reevaluateResult = async (req: AuthRequest, res: Response): Promise<void> => {
+export const reevaluateResult = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { questionUpdates } = req.body; // Array of { questionId, newMarks }
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get current result
     const { data: result, error: resultError } = await supabaseAdmin
@@ -432,10 +424,10 @@ export const reevaluateResult = async (req: AuthRequest, res: Response): Promise
 };
 
 // Export results to CSV
-export const exportResults = async (req: AuthRequest, res: Response): Promise<void> => {
+export const exportResults = async (req: Request, res: Response): Promise<void> => {
   try {
     const { testId, batchId } = req.query;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('results')

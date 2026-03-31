@@ -1,18 +1,10 @@
 import { Request, Response } from 'express';
 import { supabaseAdmin } from '../../db/supabaseAdmin';
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
-
 // Get branch settings
-export const getBranchSettings = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getBranchSettings = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: settings, error } = await supabaseAdmin
       .from('branch_settings')
@@ -83,10 +75,10 @@ export const getBranchSettings = async (req: AuthRequest, res: Response): Promis
 };
 
 // Update branch settings
-export const updateBranchSettings = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateBranchSettings = async (req: Request, res: Response): Promise<void> => {
   try {
     const { general, academic, test, notification, payment, features } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     // Check if settings exist
@@ -149,9 +141,9 @@ export const updateBranchSettings = async (req: AuthRequest, res: Response): Pro
 };
 
 // Get subjects for branch
-export const getSubjects = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getSubjects = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: subjects, error } = await supabaseAdmin
       .from('subjects')
@@ -172,10 +164,10 @@ export const getSubjects = async (req: AuthRequest, res: Response): Promise<void
 };
 
 // Create subject
-export const createSubject = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createSubject = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, code, description, color } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: subject, error } = await supabaseAdmin
       .from('subjects')
@@ -205,11 +197,11 @@ export const createSubject = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Update subject
-export const updateSubject = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateSubject = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, code, description, color, isActive } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: subject, error } = await supabaseAdmin
       .from('subjects')
@@ -235,10 +227,10 @@ export const updateSubject = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Delete subject
-export const deleteSubject = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteSubject = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Check if subject is in use
     const { data: tests } = await supabaseAdmin
@@ -277,9 +269,9 @@ export const deleteSubject = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Get faculty list for branch
-export const getFacultyList = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getFacultyList = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: faculty, error } = await supabaseAdmin
       .from('users')
@@ -312,10 +304,10 @@ export const getFacultyList = async (req: AuthRequest, res: Response): Promise<v
 };
 
 // Add/Update faculty
-export const upsertFaculty = async (req: AuthRequest, res: Response): Promise<void> => {
+export const upsertFaculty = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id, name, email, phone, subjectIds } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let facultyId = id;
 
@@ -380,10 +372,10 @@ export const upsertFaculty = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Remove faculty
-export const removeFaculty = async (req: AuthRequest, res: Response): Promise<void> => {
+export const removeFaculty = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Check if faculty has classes scheduled
     const { data: schedules } = await supabaseAdmin
@@ -423,10 +415,10 @@ export const removeFaculty = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Get holiday list
-export const getHolidays = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getHolidays = async (req: Request, res: Response): Promise<void> => {
   try {
     const { year } = req.query;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('holidays')
@@ -456,10 +448,10 @@ export const getHolidays = async (req: AuthRequest, res: Response): Promise<void
 };
 
 // Add holiday
-export const addHoliday = async (req: AuthRequest, res: Response): Promise<void> => {
+export const addHoliday = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, date, type, isRecurring } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: holiday, error } = await supabaseAdmin
       .from('holidays')
@@ -489,10 +481,10 @@ export const addHoliday = async (req: AuthRequest, res: Response): Promise<void>
 };
 
 // Delete holiday
-export const deleteHoliday = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteHoliday = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { error } = await supabaseAdmin
       .from('holidays')
@@ -513,9 +505,9 @@ export const deleteHoliday = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // Upload branch logo
-export const uploadBranchLogo = async (req: AuthRequest, res: Response): Promise<void> => {
+export const uploadBranchLogo = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     if (!req.file) {
       res.status(400).json({ error: 'No file uploaded' });
@@ -561,9 +553,9 @@ export const uploadBranchLogo = async (req: AuthRequest, res: Response): Promise
 };
 
 // Get email templates
-export const getEmailTemplates = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getEmailTemplates = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: templates, error } = await supabaseAdmin
       .from('email_templates')
@@ -584,11 +576,11 @@ export const getEmailTemplates = async (req: AuthRequest, res: Response): Promis
 };
 
 // Update email template
-export const updateEmailTemplate = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateEmailTemplate = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { subject, body } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: template, error } = await supabaseAdmin
       .from('email_templates')

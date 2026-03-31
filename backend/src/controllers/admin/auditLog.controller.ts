@@ -1,16 +1,8 @@
 import { Request, Response } from 'express';
 import { supabaseAdmin } from '../../db/supabaseAdmin';
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
-
 // Get audit logs with filtering
-export const getAuditLogs = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getAuditLogs = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       page = 1,
@@ -25,7 +17,7 @@ export const getAuditLogs = async (req: AuthRequest, res: Response): Promise<voi
     } = req.query;
 
     const offset = (Number(page) - 1) * Number(limit);
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('audit_logs')
@@ -79,10 +71,10 @@ export const getAuditLogs = async (req: AuthRequest, res: Response): Promise<voi
 };
 
 // Get audit log by ID
-export const getAuditLogById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getAuditLogById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: log, error } = await supabaseAdmin
       .from('audit_logs')
@@ -115,10 +107,10 @@ export const getAuditLogById = async (req: AuthRequest, res: Response): Promise<
 };
 
 // Get audit logs for a specific entity
-export const getEntityAuditLogs = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getEntityAuditLogs = async (req: Request, res: Response): Promise<void> => {
   try {
     const { entityType, entityId } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: logs, error } = await supabaseAdmin
       .from('audit_logs')
@@ -148,9 +140,9 @@ export const getEntityAuditLogs = async (req: AuthRequest, res: Response): Promi
 };
 
 // Get audit log statistics
-export const getAuditLogStats = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getAuditLogStats = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const { period = '30d' } = req.query;
 
     // Calculate date range
@@ -239,10 +231,10 @@ export const getAuditLogStats = async (req: AuthRequest, res: Response): Promise
 };
 
 // Export audit logs
-export const exportAuditLogs = async (req: AuthRequest, res: Response): Promise<void> => {
+export const exportAuditLogs = async (req: Request, res: Response): Promise<void> => {
   try {
     const { startDate, endDate, action, entityType } = req.query;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('audit_logs')
@@ -319,7 +311,7 @@ export const exportAuditLogs = async (req: AuthRequest, res: Response): Promise<
 };
 
 // Get available action types
-export const getActionTypes = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getActionTypes = async (req: Request, res: Response): Promise<void> => {
   try {
     res.json({
       actions: [
@@ -341,7 +333,7 @@ export const getActionTypes = async (req: AuthRequest, res: Response): Promise<v
 };
 
 // Get available entity types
-export const getEntityTypes = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getEntityTypes = async (req: Request, res: Response): Promise<void> => {
   try {
     res.json({
       entityTypes: [

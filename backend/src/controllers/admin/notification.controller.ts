@@ -1,21 +1,22 @@
 import { Request, Response } from 'express';
 import { supabaseAdmin } from '../../db/supabaseAdmin';
-import Bull from 'bull';
-
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
+import { Queue, Worker, Job } from 'bullmq';
+import { redisClient } from '../../utils/redisClient';
 
 // Notification queue for scheduled notifications
-const notificationQueue = new Bull('notifications', process.env.REDIS_URL || 'redis://localhost:6379');
+const notificationQueue = new Queue('notifications', {
+  connection: redisClient,
+});
 
 // Process notification jobs
-notificationQueue.process(async (job) => {
-  const { type, recipientId, title, message, data } = job.data;
+new Worker('notifications', async (job: Job) => {
+  const { type, recipientId, title, message, data } = job.data as {
+    type: string;
+    recipientId: string;
+    title: string;
+    message: string;
+    data: Record<string, unknown>;
+  };
 
   // Create notification record
   await supabaseAdmin
@@ -31,10 +32,10 @@ notificationQueue.process(async (job) => {
 
   // In production, also send push notification, email, etc.
   console.log(`Notification sent to ${recipientId}: ${title}`);
-});
+}, { connection: redisClient });
 
 // Get all notifications (admin view)
-export const getNotifications = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getNotifications = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       page = 1,
@@ -48,7 +49,7 @@ export const getNotifications = async (req: AuthRequest, res: Response): Promise
     } = req.query;
 
     const offset = (Number(page) - 1) * Number(limit);
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('notification_logs')
@@ -101,7 +102,7 @@ export const getNotifications = async (req: AuthRequest, res: Response): Promise
 };
 
 // Send notification
-export const sendNotification = async (req: AuthRequest, res: Response): Promise<void> => {
+export const sendNotification = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       type = 'announcement',
@@ -114,7 +115,7 @@ export const sendNotification = async (req: AuthRequest, res: Response): Promise
       data = {}
     } = req.body;
 
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     if (!title || !message) {
@@ -208,6 +209,7 @@ export const sendNotification = async (req: AuthRequest, res: Response): Promise
       const delay = new Date(scheduledAt).getTime() - Date.now();
       
       await notificationQueue.add(
+        'send',
         {
           type,
           recipientIds: recipients,
@@ -267,10 +269,10 @@ export const sendNotification = async (req: AuthRequest, res: Response): Promise
 };
 
 // Get notification details
-export const getNotificationById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getNotificationById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: notification, error } = await supabaseAdmin
       .from('notification_logs')
@@ -303,10 +305,10 @@ export const getNotificationById = async (req: AuthRequest, res: Response): Prom
 };
 
 // Cancel scheduled notification
-export const cancelNotification = async (req: AuthRequest, res: Response): Promise<void> => {
+export const cancelNotification = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get notification
     const { data: notification, error: fetchError } = await supabaseAdmin
@@ -351,10 +353,10 @@ export const cancelNotification = async (req: AuthRequest, res: Response): Promi
 };
 
 // Send bulk notifications
-export const sendBulkNotifications = async (req: AuthRequest, res: Response): Promise<void> => {
+export const sendBulkNotifications = async (req: Request, res: Response): Promise<void> => {
   try {
     const { notifications } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     if (!notifications?.length) {
@@ -440,9 +442,9 @@ export const sendBulkNotifications = async (req: AuthRequest, res: Response): Pr
 };
 
 // Get notification templates
-export const getNotificationTemplates = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getNotificationTemplates = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: templates, error } = await supabaseAdmin
       .from('notification_templates')
@@ -463,10 +465,10 @@ export const getNotificationTemplates = async (req: AuthRequest, res: Response):
 };
 
 // Create notification template
-export const createNotificationTemplate = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createNotificationTemplate = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, type, title, message, variables } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: template, error } = await supabaseAdmin
       .from('notification_templates')
@@ -498,11 +500,11 @@ export const createNotificationTemplate = async (req: AuthRequest, res: Response
 };
 
 // Update notification template
-export const updateNotificationTemplate = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateNotificationTemplate = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, type, title, message, variables } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Verify template belongs to branch (not global)
     const { data: existing, error: fetchError } = await supabaseAdmin
@@ -540,10 +542,10 @@ export const updateNotificationTemplate = async (req: AuthRequest, res: Response
 };
 
 // Delete notification template
-export const deleteNotificationTemplate = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteNotificationTemplate = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { error } = await supabaseAdmin
       .from('notification_templates')
@@ -564,7 +566,7 @@ export const deleteNotificationTemplate = async (req: AuthRequest, res: Response
 };
 
 // Get user notifications (for logged-in user)
-export const getUserNotifications = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getUserNotifications = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
     const { page = 1, limit = 20, unreadOnly = false } = req.query;
@@ -615,7 +617,7 @@ export const getUserNotifications = async (req: AuthRequest, res: Response): Pro
 };
 
 // Mark notification as read
-export const markAsRead = async (req: AuthRequest, res: Response): Promise<void> => {
+export const markAsRead = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const userId = req.user!.id;
@@ -639,7 +641,7 @@ export const markAsRead = async (req: AuthRequest, res: Response): Promise<void>
 };
 
 // Mark all as read
-export const markAllAsRead = async (req: AuthRequest, res: Response): Promise<void> => {
+export const markAllAsRead = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.user!.id;
 

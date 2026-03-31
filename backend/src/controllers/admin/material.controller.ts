@@ -1,16 +1,8 @@
 import { Request, Response } from 'express';
 import { supabaseAdmin } from '../../db/supabaseAdmin';
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    branchId: string;
-    role: string;
-  };
-}
-
 // Get all study materials
-export const getMaterials = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getMaterials = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       page = 1,
@@ -24,7 +16,7 @@ export const getMaterials = async (req: AuthRequest, res: Response): Promise<voi
     } = req.query;
 
     const offset = (Number(page) - 1) * Number(limit);
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     let query = supabaseAdmin
       .from('study_materials')
@@ -86,10 +78,10 @@ export const getMaterials = async (req: AuthRequest, res: Response): Promise<voi
 };
 
 // Get material by ID
-export const getMaterialById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getMaterialById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const { data: material, error } = await supabaseAdmin
       .from('study_materials')
@@ -131,9 +123,9 @@ export const getMaterialById = async (req: AuthRequest, res: Response): Promise<
 };
 
 // Create study material with file upload
-export const createMaterial = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createMaterial = async (req: Request, res: Response): Promise<void> => {
   try {
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
     const userId = req.user!.id;
 
     const {
@@ -238,10 +230,10 @@ export const createMaterial = async (req: AuthRequest, res: Response): Promise<v
 };
 
 // Update study material
-export const updateMaterial = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateMaterial = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     const {
       title,
@@ -352,10 +344,10 @@ export const updateMaterial = async (req: AuthRequest, res: Response): Promise<v
 };
 
 // Delete study material
-export const deleteMaterial = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteMaterial = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get material details
     const { data: material, error: fetchError } = await supabaseAdmin
@@ -403,7 +395,7 @@ export const deleteMaterial = async (req: AuthRequest, res: Response): Promise<v
 };
 
 // Record download/increment view count
-export const recordDownload = async (req: AuthRequest, res: Response): Promise<void> => {
+export const recordDownload = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -431,10 +423,10 @@ export const recordDownload = async (req: AuthRequest, res: Response): Promise<v
 };
 
 // Bulk assign materials to batches
-export const bulkAssignToBatches = async (req: AuthRequest, res: Response): Promise<void> => {
+export const bulkAssignToBatches = async (req: Request, res: Response): Promise<void> => {
   try {
     const { materialIds, batchIds } = req.body;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     if (!materialIds?.length || !batchIds?.length) {
       res.status(400).json({ error: 'Material IDs and Batch IDs are required' });
@@ -481,10 +473,10 @@ export const bulkAssignToBatches = async (req: AuthRequest, res: Response): Prom
 };
 
 // Get materials by student (for student view)
-export const getMaterialsForStudent = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getMaterialsForStudent = async (req: Request, res: Response): Promise<void> => {
   try {
     const { studentId } = req.params;
-    const branchId = req.user!.branchId;
+    const branchId = req.user!.branch_id;
 
     // Get student's batches
     const { data: studentBatches } = await supabaseAdmin
