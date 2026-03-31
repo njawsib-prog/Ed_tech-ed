@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { supabaseAdmin } from '../../db/supabaseAdmin';
 import { Queue, Worker, Job } from 'bullmq';
-import { redisClient } from '../../utils/redisClient';
+import { bullmqConnection } from '../../utils/redisClient';
 
 // Notification queue for scheduled notifications
 const notificationQueue = new Queue('notifications', {
-  connection: redisClient,
+  connection: bullmqConnection,
 });
 
 // Process notification jobs
@@ -32,7 +32,7 @@ new Worker('notifications', async (job: Job) => {
 
   // In production, also send push notification, email, etc.
   console.log(`Notification sent to ${recipientId}: ${title}`);
-}, { connection: redisClient });
+}, { connection: bullmqConnection });
 
 // Get all notifications (admin view)
 export const getNotifications = async (req: Request, res: Response): Promise<void> => {
