@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { apiClient } from '@/lib/apiClient';
+import apiClient from '@/lib/apiClient';
 import { Spinner } from '@/components/ui/Spinner';
 import { Card, CardHeader, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';

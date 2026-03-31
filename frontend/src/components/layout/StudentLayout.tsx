@@ -50,7 +50,7 @@ export function StudentLayout({ children, title }: StudentLayoutProps) {
 
   // Filter nav items based on feature flags
   const visibleNavItems = studentNavItems.filter(
-    (item) => !item.featureFlag || config.features[item.featureFlag]
+    (item) => !item.featureFlag || config.features[item.featureFlag as keyof typeof config.features]
   );
 
   if (loading) {

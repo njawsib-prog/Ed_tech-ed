@@ -8,6 +8,7 @@ interface ProgressBarProps {
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'success' | 'warning' | 'danger';
   animate?: boolean;
+  className?: string;
 }
 
 const sizeStyles = {
@@ -31,6 +32,7 @@ export function ProgressBar({
   size = 'md',
   variant = 'default',
   animate = true,
+  className = '',
 }: ProgressBarProps) {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
 
@@ -47,7 +49,7 @@ export function ProgressBar({
       : variant;
 
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       {(label || showPercentage) && (
         <div className="flex justify-between items-center mb-1">
           {label && <span className="text-sm text-gray-600">{label}</span>}

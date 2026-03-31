@@ -9,7 +9,7 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
-  featureFlag?: keyof ReturnType<typeof useInstitute>['features'];
+  featureFlag?: string;
 }
 
 interface SidebarProps {
@@ -25,7 +25,7 @@ export function Sidebar({ navItems, isOpen, onClose }: SidebarProps) {
 
   // Filter nav items based on feature flags
   const visibleItems = navItems.filter(
-    (item) => !item.featureFlag || config.features[item.featureFlag]
+    (item) => !item.featureFlag || config.features[item.featureFlag as keyof typeof config.features]
   );
 
   return (

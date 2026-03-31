@@ -147,7 +147,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
   // Filter nav items based on feature flags
   const visibleNavItems = adminNavItems.filter(
-    (item) => !item.featureFlag || config.features[item.featureFlag]
+    (item) => !item.featureFlag || config.features[item.featureFlag as keyof typeof config.features]
   );
 
   if (loading) {
