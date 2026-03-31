@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -38,7 +39,7 @@ interface Test {
   lowestScore: number;
 }
 
-export default function AdminResultsPage() {
+function AdminResultsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [results, setResults] = useState<TestResult[]>([]);
@@ -604,5 +605,13 @@ export default function AdminResultsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminResultsPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>}>
+      <AdminResultsContent />
+    </Suspense>
   );
 }
